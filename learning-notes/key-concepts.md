@@ -166,3 +166,23 @@ Snowflake stage → storage integration → IAM role → S3 bucket
 
 This is an important checkpoint before creating the Bronze layer load objects.
 
+---
+
+## Bronze Layer Design
+
+The Bronze layer is the first Snowflake layer in this project.
+
+Its purpose is to receive raw data with minimal transformation. This creates a stable landing area before applying cleanup or business rules.
+
+The Bronze tables use `STRING` data types because source files often arrive as text. Keeping raw fields as strings makes the first load more forgiving and preserves the original source values.
+
+Later layers can apply stricter data types:
+
+```text
+Bronze: raw strings
+Silver: cleaned and typed data
+Gold: curated analytics-ready data
+```
+
+This pattern makes troubleshooting easier because the raw source values remain available if a transformation issue appears later.
+
