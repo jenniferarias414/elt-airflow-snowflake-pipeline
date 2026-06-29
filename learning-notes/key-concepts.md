@@ -230,3 +230,63 @@ Bronze DOB string → Silver patient date of birth
 Bronze cost string → Silver numeric treatment cost
 ```
 
+---
+
+## Gold Layer Design
+
+The Gold layer is the curated analytics layer.
+
+While Bronze keeps raw source-shaped data and Silver creates cleaned transformed data, Gold creates business-friendly summaries.
+
+The pattern is:
+
+```text
+Bronze = raw landing
+Silver = cleaned and joined
+Gold = aggregated and analytics-ready
+```
+
+Gold objects are often the closest layer to dashboards, reports, and business-facing metrics.
+
+## Aggregate Tables
+
+An aggregate table summarizes detailed records into higher-level metrics.
+
+In this project, the Gold procedures create summaries such as:
+
+- patients by city
+- hospital performance
+- patient visit history
+- patient treatment value
+
+These tables are easier to query than raw transactional tables because common calculations are already prepared.
+
+## Stored Procedures in the Gold Layer
+
+The Gold procedures package aggregation SQL into reusable database routines.
+
+This allows Airflow to call the procedures as pipeline tasks instead of embedding all aggregation SQL directly in the DAG.
+
+The responsibility split remains:
+
+```text
+Airflow = orchestrates task order
+Snowflake = executes transformation and aggregation logic
+```
+
+## Why Gold Tables Depend on Silver Tables
+
+Gold procedures read from Silver transform tables, not directly from Bronze raw tables.
+
+This keeps the Gold layer focused on analytics rather than raw cleanup.
+
+The dependency chain is:
+
+```text
+Bronze raw tables
+      ↓
+Silver transformed tables
+      ↓
+Gold aggregate tables
+```
+
