@@ -118,3 +118,51 @@ For a learning project, manual setup and manual validation make the workflow eas
 
 Later, the same pattern could be automated further with infrastructure-as-code or CI/CD tooling. For this build, the priority is understanding each resource and validating the end-to-end flow before cleanup.
 
+---
+
+## Snowflake and AWS Trust Flow
+
+A Snowflake storage integration does not directly copy files by itself. It stores configuration that allows Snowflake to authenticate to AWS through an IAM role.
+
+The setup works in two directions:
+
+```text
+Snowflake knows which AWS role to use.
+AWS knows which Snowflake-generated principal is allowed to assume that role.
+```
+
+This is why the role setup happens in two passes:
+
+1. Create a placeholder IAM role in AWS.
+2. Create the storage integration in Snowflake.
+3. Copy Snowflake-generated values back into the AWS trust policy.
+4. Create an external stage that uses the storage integration.
+
+## Storage Integration vs External Stage
+
+The storage integration answers:
+
+```text
+How is Snowflake allowed to authenticate to cloud storage?
+```
+
+The external stage answers:
+
+```text
+Which S3 location should Snowflake read from?
+```
+
+Keeping these separate makes the design cleaner because multiple stages can use the same storage integration as long as their URLs match the allowed storage locations.
+
+## Why the Stage Validation Matters
+
+The `LIST` command confirms that Snowflake can reach the S3 location through the storage integration and IAM role.
+
+A successful `LIST` does not mean data has been loaded yet. It means the access path is working:
+
+```text
+Snowflake stage → storage integration → IAM role → S3 bucket
+```
+
+This is an important checkpoint before creating the Bronze layer load objects.
+
