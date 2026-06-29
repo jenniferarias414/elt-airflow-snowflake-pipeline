@@ -186,3 +186,47 @@ Gold: curated analytics-ready data
 
 This pattern makes troubleshooting easier because the raw source values remain available if a transformation issue appears later.
 
+---
+
+## Silver Layer Design
+
+The Silver layer improves raw Bronze data by applying structure, cleanup, type conversion, and joins.
+
+In this project, Silver transformations are stored as Snowflake stored procedures. This keeps the SQL transformation logic inside Snowflake while allowing Airflow to orchestrate when each procedure runs.
+
+The pattern is:
+
+```text
+Bronze raw tables
+      ↓
+Silver stored procedures
+      ↓
+Silver transformed tables
+```
+
+## Why Use Stored Procedures
+
+Stored procedures are reusable database routines.
+
+For this project, they help separate responsibilities:
+
+```text
+Airflow controls workflow order.
+Snowflake performs data transformations.
+```
+
+This is useful because the transformation SQL stays close to the data warehouse, while Airflow focuses on scheduling and dependencies.
+
+## Safer Type Conversion
+
+The Bronze layer stores raw values as strings. The Silver layer begins converting those strings into useful data types.
+
+This project uses `TRY_TO_DATE()` and `TRY_TO_DECIMAL()` for conversions. These functions help prevent one bad source value from breaking the entire transformation.
+
+For example:
+
+```text
+Bronze DOB string → Silver patient date of birth
+Bronze cost string → Silver numeric treatment cost
+```
+
