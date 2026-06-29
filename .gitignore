@@ -1,0 +1,31 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Environment / secrets
+.env
+*.pem
+*.key
+credentials
+config
+aws_credentials*
+snowflake_credentials*
+*.secret
+
+# Airflow local files
+airflow.db
+airflow.cfg
+logs/
+plugins/__pycache__/
+
+# Private learning/build notes
+notes/private/
+
+# Generated files
+*.zip
+*.tar.gz
