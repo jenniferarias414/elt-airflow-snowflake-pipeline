@@ -55,3 +55,66 @@ A Snowflake storage integration is a secure Snowflake object that allows Snowfla
 An IAM role defines what actions an AWS service or external trusted service can perform.
 
 In this project, Snowflake will use an IAM role to access files in a specific S3 bucket.
+
+---
+
+## Implementation Choices Worth Noting
+
+### Scoped S3 Access Instead of Broad Bucket Permissions
+
+The Snowflake IAM role is configured to use a bucket-scoped S3 policy instead of broad S3 access.
+
+This keeps the role focused on the project data bucket and supports a better least-privilege pattern:
+
+```text
+Snowflake storage integration → IAM role → specific S3 data bucket
+```
+
+This approach helps make the access pattern easier to reason about and avoids giving the role unnecessary access to unrelated S3 buckets.
+
+### Separate Buckets for Airflow Files and Pipeline Data
+
+This project separates Airflow files from pipeline data:
+
+```text
+jennyarias-elt-airflow-files   # DAG files and requirements.txt
+jennyarias-elt-airflow-data    # raw/staged/archive data files
+```
+
+Keeping these concerns separate makes the project easier to manage:
+
+- Airflow files support orchestration.
+- Data bucket files support ingestion and loading.
+- Cleanup and troubleshooting are more focused because each bucket has a clear purpose.
+
+### Data Bucket Prefixes
+
+The data bucket uses logical prefixes:
+
+```text
+raw/       incoming source files
+staged/    files prepared for Snowflake loading
+archive/   optional processed-file storage
+```
+
+S3 does not use folders in the same way a local computer does, but prefixes create a folder-like structure that makes object storage easier to navigate and document.
+
+### Airflow Requirements File at the Bucket Root
+
+The `requirements.txt` file is uploaded to the root of the Airflow files bucket, while DAG files belong under the `dags/` prefix.
+
+This keeps the Airflow dependency file separate from the DAG code:
+
+```text
+requirements.txt
+dags/
+```
+
+The requirements file defines Python packages the Airflow environment needs, while the DAG folder contains workflow definitions.
+
+### Manual Builds and Controlled Resource Usage
+
+For a learning project, manual setup and manual validation make the workflow easier to observe and troubleshoot.
+
+Later, the same pattern could be automated further with infrastructure-as-code or CI/CD tooling. For this build, the priority is understanding each resource and validating the end-to-end flow before cleanup.
+
