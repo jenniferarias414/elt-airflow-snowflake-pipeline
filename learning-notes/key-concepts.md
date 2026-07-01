@@ -325,3 +325,42 @@ notes/private/
 
 This separation keeps the repository useful for review and learning while avoiding accidental exposure of AWS account IDs, role ARNs, Snowflake external IDs, credentials, or private troubleshooting notes.
 
+---
+
+## Managed Apache Airflow on AWS
+
+Amazon MWAA is AWS-managed Apache Airflow. It provides the Airflow scheduler, workers, metadata database, logs, and web UI without requiring a manually managed Airflow server.
+
+In this project, Airflow is the orchestrator.
+
+It does not replace Snowflake or S3.
+
+```text
+S3 = stores files
+Snowflake = stores and transforms data
+Airflow = schedules and coordinates tasks
+```
+
+## DAG Files and Requirements
+
+MWAA reads DAG files from an S3 `dags/` folder.
+
+The `requirements.txt` file is separate because it defines Python packages that must be installed into the Airflow environment.
+
+```text
+dags/            = workflow definitions
+requirements.txt = Python dependencies
+```
+
+## MWAA Execution Role
+
+The MWAA execution role controls what the Airflow environment can access in AWS.
+
+For this project, the execution role needs scoped access to:
+
+- read DAG and requirements files
+- read/write project data files
+- write logs through AWS-managed MWAA permissions
+
+Using scoped bucket access keeps the lab closer to least-privilege design.
+
