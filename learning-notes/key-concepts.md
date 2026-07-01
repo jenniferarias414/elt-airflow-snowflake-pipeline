@@ -364,3 +364,35 @@ For this project, the execution role needs scoped access to:
 
 Using scoped bucket access keeps the lab closer to least-privilege design.
 
+---
+
+## Airflow Connections
+
+Airflow connections store connection details that DAG tasks can reference by `conn_id`.
+
+In this project, the DAG uses:
+
+```text
+conn_id = snowflake_conn
+```
+
+This keeps connection details separate from DAG code. The DAG does not contain the Snowflake username, password, account identifier, or role details.
+
+## Why Test the Connection First
+
+Testing the Snowflake connection with a small DAG reduces troubleshooting complexity.
+
+The test answers one focused question:
+
+```text
+Can Airflow execute SQL in Snowflake?
+```
+
+Once that works, the project can move on to larger pipeline tasks such as loading Bronze tables and calling Silver/Gold stored procedures.
+
+## Airflow DAG Sync from S3
+
+MWAA reads DAG files from the S3 `dags/` prefix.
+
+After a DAG file is uploaded, it can take a few minutes to appear in the Airflow UI. This delay is normal because the managed Airflow environment periodically scans and syncs DAG files from S3.
+
