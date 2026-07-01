@@ -290,3 +290,15 @@ Silver transformed tables
 Gold aggregate tables
 ```
 
+
+### Filtering Snowflake `SHOW` Results
+
+Snowflake `SHOW` commands can return system or built-in objects along with project-created objects. In this project, custom stored procedures are identified by:
+
+```text
+schema_name = GOLD
+is_builtin = N
+```
+
+Filtering `SHOW PROCEDURES` output makes validation screenshots clearer and keeps the focus on project-created objects.
+
