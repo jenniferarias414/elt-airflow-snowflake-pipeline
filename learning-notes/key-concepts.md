@@ -445,3 +445,46 @@ Without Airflow, the pipeline would require manually running several steps in th
 
 Airflow turns those steps into a repeatable workflow with task status, logs, dependencies, and manual triggering.
 
+---
+
+## Airflow vs dbt
+
+Airflow and dbt solve different problems in a data pipeline.
+
+Airflow is a workflow orchestrator. It defines task order, dependencies, scheduling, retries, and logs.
+
+dbt is a transformation framework. It is mainly used to build, test, document, and organize SQL models inside a data warehouse.
+
+A simple comparison:
+
+```text
+Airflow = when tasks run and in what order
+dbt = how SQL transformations are modeled and tested
+Snowflake = where the data is stored and transformed
+```
+
+In this project, Airflow coordinates the workflow, while Snowflake executes the SQL loading and transformation logic.
+
+The project uses Snowflake stored procedures for Silver and Gold transformations. In a different version of this architecture, dbt could be used for those transformation layers, and Airflow could orchestrate the dbt run.
+
+Example pattern:
+
+```text
+Airflow → load raw data → run dbt models → validate outputs
+```
+
+## What Airflow Does in This Project
+
+Airflow acts as the pipeline orchestrator.
+
+It coordinates:
+
+- downloading source CSV files
+- uploading files to S3
+- running Snowflake `COPY INTO` commands
+- calling Snowflake Silver stored procedures
+- calling Snowflake Gold stored procedures
+- tracking task success, failure, duration, and logs
+
+Airflow does not replace S3, Snowflake, or dbt. It connects tools together into a repeatable workflow.
+
