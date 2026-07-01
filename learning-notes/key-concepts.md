@@ -302,3 +302,26 @@ is_builtin = N
 
 Filtering `SHOW PROCEDURES` output makes validation screenshots clearer and keeps the focus on project-created objects.
 
+---
+
+## Public Templates vs Private Configuration
+
+This repository separates reusable examples from account-specific configuration.
+
+Public-safe examples are kept in folders such as:
+
+```text
+aws/iam/
+docs/
+learning-notes/
+snowflake/sql/
+```
+
+Private or account-specific values are kept under:
+
+```text
+notes/private/
+```
+
+This separation keeps the repository useful for review and learning while avoiding accidental exposure of AWS account IDs, role ARNs, Snowflake external IDs, credentials, or private troubleshooting notes.
+
