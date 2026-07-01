@@ -396,3 +396,52 @@ MWAA reads DAG files from the S3 `dags/` prefix.
 
 After a DAG file is uploaded, it can take a few minutes to appear in the Airflow UI. This delay is normal because the managed Airflow environment periodically scans and syncs DAG files from S3.
 
+---
+
+## Full Airflow DAG Orchestration
+
+The final DAG connects the major project pieces into one workflow.
+
+Airflow does not store the data and does not perform the warehouse transformations directly. Instead, it coordinates tasks across AWS S3 and Snowflake.
+
+The responsibility split is:
+
+```text
+Airflow = task orchestration
+S3 = source file landing area
+Snowflake Bronze = raw loaded tables
+Snowflake Silver = cleaned and joined tables
+Snowflake Gold = analytics-ready aggregate tables
+```
+
+## DAG Task Dependencies
+
+The DAG defines task order so later steps only run after required earlier steps are complete.
+
+The dependency pattern is:
+
+```text
+download/upload files
+      ↓
+load all Bronze tables
+      ↓
+run Silver transformations
+      ↓
+run Gold aggregations
+```
+
+Some tasks run in parallel. For example, the five Bronze table loads can run after the files are uploaded because each table loads from a different CSV file.
+
+## Why Airflow Is Useful Here
+
+Without Airflow, the pipeline would require manually running several steps in the correct order:
+
+1. Download files.
+2. Upload files to S3.
+3. Load Bronze tables.
+4. Run Silver procedures.
+5. Run Gold procedures.
+6. Validate outputs.
+
+Airflow turns those steps into a repeatable workflow with task status, logs, dependencies, and manual triggering.
+
